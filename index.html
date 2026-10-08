@@ -124,8 +124,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
 .words { margin-top: 1.6em; padding: 1em 1.2em; border-left: .3em solid #d92b2b; background: var(--tint); }
 .words small { display: block; font-size: .7em; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: .2em; }
 .words strong { font-weight: 700; letter-spacing: .02em; }
-.prec { margin-top: 1.2em; font-size: .9em; color: var(--ink-soft); white-space: pre-line; padding-left: 1.2em; border-left: 1px solid var(--rule); }
-.prec small { display: block; font-size: .78em; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; margin-bottom: .2em; }
+.pn { font-weight: 400; font-size: .86em; color: var(--ink-soft); margin-top: .2em; white-space: pre-line; }
 .foot { display: grid; grid-template-columns: minmax(0, 1fr) 17em; gap: 2.4em; margin-top: 1.8em; align-items: start; }
 .nb { font-size: .86em; color: var(--ink-soft); }
 .nb h4 { margin: 0 0 .5em; font-size: 1.05em; letter-spacing: .04em; color: #d92b2b; font-weight: 700; text-decoration: underline; text-underline-offset: .25em; }
@@ -176,8 +175,6 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
       </div>
       <label for="lieu">Établie à
         <input id="lieu" data-k="lieu" type="text"></label>
-      <label for="precision">Précision (facultatif)
-        <textarea id="precision" data-k="precision" rows="2" placeholder="Ex. : prestation réalisée le 30 décembre, livraison au siège"></textarea></label>
     </fieldset>
 
     <fieldset>
@@ -235,7 +232,6 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
     lines: [{ d: "Impression Gros Chèque", q: 1, p: 25000 }],
     tva: 0, remise: 0,
     nb: "Cette facture est payable à réception.\nTout règlement s'effectue en Francs CFA (FCFA).\nLes travaux d'impression validés ne sont ni repris ni échangés après livraison.",
-    precision: "",
     rc: "SN DKR 2016 A 29669", ninea: "6194063", tel: "33 825 64 73 / 77 410 55 83",
     adresse: "Point E Rue 4 x H Villa N°14 derrière les Ambassades Point E Dakar – SENEGAL",
     banque: "Banque Islamique du Sénégal N° SN 079 01104 251076737001 / 24", email: "2aservices2018@gmail.com"
@@ -300,7 +296,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
     var t = totals(), rows = "", i;
     S.lines.forEach(function (l) {
       var tot = (+l.q || 0) * (+l.p || 0);
-      rows += '<tr><td>' + esc(l.d) + '</td><td class="q">' + pad2(l.q) + '</td><td>' + fmt(+l.p || 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+      rows += '<tr><td>' + esc(l.d) + (String(l.n || "").trim() ? '<div class="pn">' + esc(String(l.n).trim()) + '</div>' : '') + '</td><td class="q">' + pad2(l.q) + '</td><td>' + fmt(+l.p || 0) + '</td><td>' + fmt(tot) + '</td></tr>';
     });
     for (i = S.lines.length; i < 5; i++) rows += '<tr class="blank"><td>.</td><td class="q">.</td><td>.</td><td>.</td></tr>';
     var dashIdx = String(S.num).lastIndexOf("-");
@@ -321,7 +317,6 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
       '<table class="items"><thead><tr><th>Désignation</th><th class="q">Qté</th><th>P. Unitaire</th><th>P. Total</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="totals">' + sub + '<div class="grand"><span>Montant total</span><b>' + fmt(t.total) + ' FCFA</b></div></div>' +
       '<div class="words"><small>Arrêtée la présente facture à la somme de</small><strong>' + esc(w) + ' FRANCS CFA.</strong></div>' +
-      (String(S.precision || "").trim() ? '<div class="prec"><small>Précision</small>' + esc(S.precision.trim()) + '</div>' : '') +
       '<div class="foot">' + nb + '<div class="sign"><div class="dir">LA DIRECTION</div>' + stamp() + '</div></div>' +
       '<div class="bottom"><i class="rl"></i><div>' + esc(S.adresse) + '</div><div>RC: ' + esc(S.rc) + ' – NINEA:' + esc(S.ninea) + ' - Tél : ' + esc(S.tel) + '</div>' +
       '<div><b>Compte Bancaire : ' + esc(S.banque) + '</b></div><div>Email : <u>' + esc(S.email) + '</u></div></div>';
@@ -335,6 +330,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
       var d = document.createElement("div"); d.className = "line";
       d.innerHTML =
         '<label class="desig" for="ld' + i + '">Désignation<input id="ld' + i + '" data-i="' + i + '" data-f="d" type="text" value="' + esc(l.d) + '"></label>' +
+        '<label class="desig" for="ln' + i + '">Précision (facultatif)<input id="ln' + i + '" data-i="' + i + '" data-f="n" type="text" placeholder="Ex. : format A4, 500 exemplaires" value="' + esc(l.n || "") + '"></label>' +
         '<label for="lq' + i + '">Qté<input id="lq' + i + '" data-i="' + i + '" data-f="q" type="number" min="0" step="1" inputmode="numeric" value="' + esc(l.q) + '"></label>' +
         '<label for="lp' + i + '">P. unitaire<input id="lp' + i + '" data-i="' + i + '" data-f="p" type="number" min="0" step="500" inputmode="numeric" value="' + esc(l.p) + '"></label>' +
         '<button type="button" class="btn icon rm" data-rm="' + i + '" aria-label="Supprimer la ligne ' + (i + 1) + '">×</button>' +
@@ -345,7 +341,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
   linesEl.addEventListener("input", function (e) {
     var el = e.target, i = el.getAttribute("data-i"), f = el.getAttribute("data-f");
     if (i == null) return;
-    S.lines[i][f] = f === "d" ? el.value : el.value === "" ? 0 : parseFloat(el.value);
+    S.lines[i][f] = (f === "d" || f === "n") ? el.value : el.value === "" ? 0 : parseFloat(el.value);
     var l = S.lines[i]; document.getElementById("ls" + i).textContent = "Total : " + fmt((+l.q || 0) * (+l.p || 0)) + " FCFA";
     update();
   });
@@ -376,8 +372,8 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
   document.getElementById("copy").addEventListener("click", function () {
     var t = totals();
     var txt = "FACTURE N°" + S.num + "\n" + S.lieu + ", le " + longDate(S.date) + "\nClient : " + S.client + " (" + S.ville + ")\n\n" +
-      S.lines.map(function (l) { return "- " + l.d + " : " + pad2(l.q) + " x " + fmt(+l.p || 0) + " = " + fmt((+l.q || 0) * (+l.p || 0)) + " FCFA"; }).join("\n") +
-      "\n\nMONTANT TOTAL : " + fmt(t.total) + " FCFA\nArrêtée la présente facture à la somme de : " + words(t.total).toUpperCase() + " FRANCS CFA." + (String(S.precision || "").trim() ? "\n\nPrécision : " + S.precision.trim() : "") + "\n\nNB :\n" +
+      S.lines.map(function (l) { return "- " + l.d + (String(l.n || "").trim() ? " (" + String(l.n).trim() + ")" : "") + " : " + pad2(l.q) + " x " + fmt(+l.p || 0) + " = " + fmt((+l.q || 0) * (+l.p || 0)) + " FCFA"; }).join("\n") +
+      "\n\nMONTANT TOTAL : " + fmt(t.total) + " FCFA\nArrêtée la présente facture à la somme de : " + words(t.total).toUpperCase() + " FRANCS CFA.\n\nNB :\n" +
       S.nb.split("\n").filter(function (s) { return s.trim(); }).map(function (s) { return "- " + s.trim(); }).join("\n");
     function fallback() {
       var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select();
