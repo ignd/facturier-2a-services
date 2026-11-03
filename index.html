@@ -278,7 +278,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
   var S = load();
   if (!TYPES[S.type]) S.type = "facture";
   if (S.validite == null) S.validite = 30;
-  function T() { return TYPES[S.type] || TYPES.facture; }
+  function docType() { return TYPES[S.type] || TYPES.facture; }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function load() {
     try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && o.lines) return o; } } catch (e) {}
@@ -338,9 +338,9 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
     var t = totals(), rows = "", i;
     S.lines.forEach(function (l) {
       var tot = (+l.q || 0) * (+l.p || 0);
-      rows += '<tr><td>' + esc(l.d) + (String(l.n || "").trim() ? '<div class="pn">' + esc(String(l.n).trim()) + '</div>' : '') + '</td><td class="q">' + pad2(l.q) + '</td>' + (T().prices ? '<td>' + fmt(+l.p || 0) + '</td><td>' + fmt(tot) + '</td>' : '') + '</tr>';
+      rows += '<tr><td>' + esc(l.d) + (String(l.n || "").trim() ? '<div class="pn">' + esc(String(l.n).trim()) + '</div>' : '') + '</td><td class="q">' + pad2(l.q) + '</td>' + (docType().prices ? '<td>' + fmt(+l.p || 0) + '</td><td>' + fmt(tot) + '</td>' : '') + '</tr>';
     });
-    for (i = S.lines.length; i < 5; i++) rows += '<tr class="blank"><td>.</td><td class="q">.</td>' + (T().prices ? '<td>.</td><td>.</td>' : '') + '</tr>';
+    for (i = S.lines.length; i < 5; i++) rows += '<tr class="blank"><td>.</td><td class="q">.</td>' + (docType().prices ? '<td>.</td><td>.</td>' : '') + '</tr>';
     var dashIdx = String(S.num).lastIndexOf("-");
     var numHtml = dashIdx > 0 ? esc(S.num.slice(0, dashIdx)) + '<em>-</em>' + esc(S.num.slice(dashIdx + 1)) : esc(S.num);
     var sub = "";
@@ -349,7 +349,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
     if (+S.tva) sub += '<div class="r"><span>TVA ' + esc(S.tva) + ' %</span><span>' + fmt(t.tva) + '</span></div>';
     var nbLines = S.nb.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
     var nb = nbLines.length ? '<div class="nb"><h4>NB :</h4><ul>' + nbLines.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join("") + '</ul></div>' : '<div></div>';
-    var w = words(t.total).toUpperCase(), ty = T(), titleTxt = ty.title.toUpperCase();
+    var w = words(t.total).toUpperCase(), ty = docType(), titleTxt = ty.title.toUpperCase();
     var head = '<tr><th>Désignation</th><th class="q">Qté</th>' + (ty.prices ? '<th>P. Unitaire</th><th>P. Total</th>' : '') + '</tr>';
     var when = esc(S.lieu) + ', le ' + esc(longDate(S.date)) + (ty.valid && +S.validite ? '<div class="sub">Offre valable ' + esc(S.validite) + ' jours</div>' : '');
     document.getElementById("sheet").innerHTML =
@@ -419,7 +419,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
   }
   function update() {
     var f = document.getElementById("form"); f.setAttribute("data-type", S.type);
-    document.getElementById("validite-wrap").hidden = !T().valid;
+    document.getElementById("validite-wrap").hidden = !docType().valid;
     renderPaper(); save();
   }
 
@@ -428,7 +428,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
   function say(msg) { toast.textContent = msg; clearTimeout(tt); tt = setTimeout(function () { toast.textContent = ""; }, 2600); }
   document.getElementById("copy").addEventListener("click", function () {
     var t = totals();
-    var ty = T(), txt = ty.title.toUpperCase() + " N°" + S.num + "\n" + S.lieu + ", le " + longDate(S.date) + "\nClient : " + S.client + " (" + S.ville + ")\n\n" +
+    var ty = docType(), txt = ty.title.toUpperCase() + " N°" + S.num + "\n" + S.lieu + ", le " + longDate(S.date) + "\nClient : " + S.client + " (" + S.ville + ")\n\n" +
       S.lines.map(function (l) { return "- " + l.d + (String(l.n || "").trim() ? " (" + String(l.n).trim() + ")" : "") + " : " + (ty.prices ? pad2(l.q) + " x " + fmt(+l.p || 0) + " = " + fmt((+l.q || 0) * (+l.p || 0)) + " FCFA" : "quantité " + pad2(l.q)); }).join("\n") +
       (ty.prices ? "\n\nMONTANT TOTAL : " + fmt(t.total) + " FCFA\n" + ty.words + " : " + words(t.total).toUpperCase() + " FRANCS CFA." : "") + "\n\nNB :\n" +
       S.nb.split("\n").filter(function (s) { return s.trim(); }).map(function (s) { return "- " + s.trim(); }).join("\n");
@@ -446,7 +446,7 @@ table.items { width: 100%; border-collapse: collapse; margin-top: 2.2em; font-va
     S.num = n + "-" + (m ? m[2] : y);
     S.client = ""; S.ville = ""; S.lines = [{ d: "", q: 1, p: 0 }]; S.remise = 0;
     S.date = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
-    fillFields(); renderLines(); update(); say(T().label + " n°" + S.num + " prête.");
+    fillFields(); renderLines(); update(); say(docType().label + " n°" + S.num + " prête.");
     document.getElementById("client").focus();
   });
 
